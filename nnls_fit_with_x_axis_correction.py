@@ -56,11 +56,14 @@ def nnls_fit_with_x_axis_correction_gauss_newton(x_original: np.ndarray,
                                                  library: np.ndarray,
                                                  x0: float = 0,
                                                  max_iter: int = 30,
-                                                 initial_parameters: tuple = (0,0)):
+                                                 initial_parameters: tuple = (0,0),
+                                                 relative_tolerance = 10**(-5)):
     d_offset = 10 ** (-6)
     d_slope = 10 ** (-6)
     parameters = initial_parameters
     prediction = None
+    rss_list = []
+
 
     for k in range(max_iter):
         test_parameters = parameters
@@ -82,5 +85,12 @@ def nnls_fit_with_x_axis_correction_gauss_newton(x_original: np.ndarray,
         J_pseudoinverse = pinv(J.T @ J) @ J.T
         parameter_update = J_pseudoinverse @ residual
         parameters = parameters - parameter_update
+
+        rss_list.append(rss(residual))
+
+        if len(rss_list) > 2:
+            if abs(rss_list[-2] - rss_list[-1])/rss_list[-2] < relative_tolerance:
+                break
+
 
     return prediction, parameters
