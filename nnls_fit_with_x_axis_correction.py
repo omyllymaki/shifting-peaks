@@ -5,7 +5,7 @@ import numpy as np
 
 from analysis import nnls_fit
 from correction_models import linear_correction
-from utils import estimate_signal, rss, interpolate_array, calculate_pseudoinverse
+from utils import calculate_signal, rss, interpolate_array, calculate_pseudoinverse
 
 
 def nnls_fit_with_interpolated_library(x_original, x_target, library, signal):
@@ -17,7 +17,7 @@ def nnls_fit_with_interpolated_library(x_original, x_target, library, signal):
     library_interpolated[:, is_nan] = 0
 
     prediction = nnls_fit(signal_copy, library_interpolated)
-    estimate = estimate_signal(prediction, library_interpolated)
+    estimate = calculate_signal(prediction, library_interpolated)
     residual = estimate - signal_copy
 
     return prediction, residual

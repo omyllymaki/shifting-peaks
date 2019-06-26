@@ -6,17 +6,13 @@ from numpy.random import normal as rand
 
 from constants import X, PATH_PURE_COMPONENTS, PATH_MIXTURES
 from file_io import save_pickle_file
-from utils import calculate_mixture_signal, interpolate_signal
+from utils import interpolate_signal, calculate_signal
 
 N_SAMPLES = 100
 OFFSET_ERROR_STDEV = 2
 SLOPE_ERROR_STDEV = 0.01
 QUADRATIC_ERROR_STDEV = 0
-CONCENTRATIONS = {
-    'A': 100,
-    'B': 500,
-    'C': 35,
-}
+CONCENTRATIONS = [100, 500, 35]
 
 
 def gaussian(x: np.ndarray,
@@ -28,12 +24,12 @@ def gaussian(x: np.ndarray,
     return multiplier * np.exp(exponent)
 
 
-def generate_pure_component_signals() -> dict:
-    return {
-        'A': gaussian(X, 7, 20, 7),
-        'B': gaussian(X, 6, 50, 19),
-        'C': gaussian(X, 2, 55, 2),
-    }
+def generate_library() -> np.ndarray:
+    return np.array([
+        gaussian(X, 7, 20, 7),
+        gaussian(X, 6, 50, 19),
+        gaussian(X, 2, 55, 2),
+    ])
 
 
 def generate_distorted_axis(x: np.ndarray,
@@ -43,18 +39,15 @@ def generate_distorted_axis(x: np.ndarray,
     return rand(scale=offset_error) + (1 + rand(scale=slope_error)) * x + rand(scale=quadratic_error) * x ** 2
 
 
-def generate_random_concentrations() -> dict:
-    concentrations = {}
-    for component, max_concentration in CONCENTRATIONS.items():
-        concentrations[component] = max_concentration * random.random()
-    return concentrations
+def generate_random_concentrations() -> np.ndarray:
+    return np.array([c * random.random() for c in CONCENTRATIONS])
 
 
-def generate_mixtures(component_signals):
+def generate_mixtures(library):
     mixtures_data = []
     for _ in range(N_SAMPLES):
         concentrations = generate_random_concentrations()
-        mixture_signal = calculate_mixture_signal(concentrations, component_signals)
+        mixture_signal = calculate_signal(concentrations, library)
         x_distorted = generate_distorted_axis(X, OFFSET_ERROR_STDEV, SLOPE_ERROR_STDEV, QUADRATIC_ERROR_STDEV)
         mixture_signal = interpolate_signal(mixture_signal, X, x_distorted, 0, 0)
         mixtures_data.append(
@@ -64,14 +57,13 @@ def generate_mixtures(component_signals):
 
 
 def main():
-    component_signals = generate_pure_component_signals()
-    mixtures_data = generate_mixtures(component_signals)
+    library = generate_library()
+    mixtures_data = generate_mixtures(library)
 
     plt.figure()
-    for component_name, signal in component_signals.items():
-        plt.plot(X, signal, label=component_name)
+    for signal in library:
+        plt.plot(X, signal)
     plt.grid()
-    plt.legend()
     plt.show()
 
     plt.figure()
@@ -80,7 +72,7 @@ def main():
     plt.grid()
     plt.show()
 
-    save_pickle_file(component_signals, PATH_PURE_COMPONENTS)
+    save_pickle_file(library, PATH_PURE_COMPONENTS)
     save_pickle_file(mixtures_data, PATH_MIXTURES)
 
 

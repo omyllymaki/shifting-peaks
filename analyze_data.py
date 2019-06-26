@@ -5,17 +5,18 @@ from analysis import nnls_fit
 from constants import PATH_PURE_COMPONENTS, PATH_MIXTURES, X
 from file_io import load_pickle_file
 from nnls_fit_with_x_axis_correction import analysis
-from utils import dict_to_array, estimate_signal
+from utils import calculate_signal
 
-component_signals = load_pickle_file(PATH_PURE_COMPONENTS)
+library = load_pickle_file(PATH_PURE_COMPONENTS)
 mixtures_data = load_pickle_file(PATH_MIXTURES)
-L = dict_to_array(component_signals)
 
 results = []
 for sample in mixtures_data:
-    true_concentrations = dict_to_array(sample['concentrations'])
+    true_concentrations = sample['concentrations']
     signal = sample['signal']
-    result = [true_concentrations[-1], nnls_fit(signal, L)[-1], analysis(X, signal, L)[0][-1]]
+    result = [true_concentrations[-1],
+              nnls_fit(signal, library)[-1],
+              analysis(X, signal, library)[0][-1]]
     results.append(result)
 results = np.array(results)
 
@@ -35,10 +36,10 @@ index = 1
 true_concentrations = mixtures_data[index]['concentrations']
 signal = mixtures_data[index]['signal']
 
-prediction0 = nnls_fit(signal, L)
-prediction = analysis(X, signal, L)
+prediction0 = nnls_fit(signal, library)
+prediction = analysis(X, signal, library)
 
-signal_estimate = estimate_signal(prediction0, L)
+signal_estimate = calculate_signal(prediction0, library)
 residual = signal_estimate - signal
 
 print('Prediction without correction', prediction0)

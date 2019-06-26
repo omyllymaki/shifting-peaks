@@ -8,7 +8,7 @@ from numpy.testing import assert_almost_equal
 
 from file_io import load_pickle_file
 from nnls_fit_with_x_axis_correction import solve_with_grid_search
-from utils import calculate_mixture_signal, interpolate_signal, dict_to_array
+from utils import interpolate_signal, calculate_signal
 
 
 class TestGridSearch(unittest.TestCase):
@@ -20,11 +20,10 @@ class TestGridSearch(unittest.TestCase):
     def setUp(self):
         root_path = os.path.abspath(os.path.dirname(__file__))
         file_path = os.path.join(root_path, 'data', 'pure_components.p')
-        self.pure_components = load_pickle_file(file_path)
-        self.library = dict_to_array(self.pure_components)
+        self.library = load_pickle_file(file_path)
         self.x = np.arange(1, 100)
-        self.concentrations = {'A': 1, 'B': 3, 'C': 5}
-        self.mixture_signal = calculate_mixture_signal(self.concentrations, self.pure_components)
+        self.concentrations = np.array([1, 3, 5])
+        self.mixture_signal = calculate_signal(self.concentrations, self.library)
 
     def test_no_x_axis_errors_should_pass(self) -> None:
         x_distorted = self.x
@@ -47,5 +46,5 @@ class TestGridSearch(unittest.TestCase):
         actual, _ = self.method(self.x,
                                 signal,
                                 self.library)
-        expected = np.array(list(self.concentrations.values()))
+        expected = self.concentrations
         assert_almost_equal(actual, expected, decimal=decimal)
