@@ -3,9 +3,8 @@ from typing import Callable
 
 import numpy as np
 
-from analysis import nnls_fit
 from correction_models import linear_correction
-from utils import calculate_signal, rss, interpolate_array, calculate_pseudoinverse
+from utils import calculate_signal, rss, interpolate_array, calculate_pseudoinverse, nnls_fit
 
 
 def nnls_fit_with_interpolated_library(x_original, x_target, library, signal):

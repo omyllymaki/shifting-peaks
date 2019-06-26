@@ -1,6 +1,7 @@
 import numpy as np
 
 from numpy.linalg import pinv
+from scipy.optimize import nnls
 
 
 def interpolate_signal(signal, x_original, x_target, left=np.nan, right=np.nan):
@@ -21,3 +22,7 @@ def rss(residuals: np.ndarray) -> float:
 
 def calculate_pseudoinverse(x: np.ndarray):
     return pinv(x.T @ x) @ x.T
+
+
+def nnls_fit(s: np.ndarray, L: np.ndarray) -> np.ndarray:
+    return nnls(L.T, s)[0]

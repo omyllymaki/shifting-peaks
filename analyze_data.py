@@ -1,11 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from analysis import nnls_fit
 from constants import PATH_PURE_COMPONENTS, PATH_MIXTURES, X
 from file_io import load_pickle_file
 from nnls_fit_with_x_axis_correction import analysis
-from utils import calculate_signal
+from utils import calculate_signal, nnls_fit
 
 library = load_pickle_file(PATH_PURE_COMPONENTS)
 mixtures_data = load_pickle_file(PATH_MIXTURES)
