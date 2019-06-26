@@ -1,13 +1,14 @@
 import itertools
+from typing import Callable
 
 import numpy as np
-from numpy.linalg import pinv
 
 from analysis import nnls_fit
-from utils import estimate_signal, rss, interpolate_array
+from correction_models import linear_correction
+from utils import estimate_signal, rss, interpolate_array, calculate_pseudoinverse
 
 
-def nnls_fit_with_interpolation(x_original, x_target, library, signal):
+def nnls_fit_with_interpolated_library(x_original, x_target, library, signal):
     library_interpolated = interpolate_array(library, x_original, x_target)
     signal_copy = signal.copy()
 
@@ -22,25 +23,19 @@ def nnls_fit_with_interpolation(x_original, x_target, library, signal):
     return prediction, residual
 
 
-def get_x_axis_for_interpolation(x_original, parameters, x0):
-    return (parameters[0] + 1) * (x_original - x0) + parameters[1] + x0
-
-
-def nnls_fit_with_x_axis_correction_trial_and_error(x_original: np.ndarray,
-                                                    signal: np.ndarray,
-                                                    library: np.ndarray,
-                                                    offset_candidates: np.ndarray,
-                                                    slope_candidates: np.ndarray,
-                                                    x0: float = 0):
-    parameters_grid = list(itertools.product(slope_candidates, offset_candidates))
+def solve_with_grid_search(x_original: np.ndarray,
+                           signal: np.ndarray,
+                           library: np.ndarray,
+                           candidates: np.ndarray,
+                           correction_model=linear_correction):
     min_residual_sum = float('inf')
     solution = None
     best_parameters = None
 
-    for parameters in parameters_grid:
+    for parameters in candidates:
 
-        x_target = get_x_axis_for_interpolation(x_original, parameters, x0)
-        prediction, residual = nnls_fit_with_interpolation(x_original, x_target, library, signal)
+        x_target = correction_model(x_original, parameters)
+        prediction, residual = nnls_fit_with_interpolated_library(x_original, x_target, library, signal)
         residual_sum = rss(residual)
 
         if residual_sum < min_residual_sum:
@@ -51,46 +46,60 @@ def nnls_fit_with_x_axis_correction_trial_and_error(x_original: np.ndarray,
     return solution, best_parameters
 
 
-def nnls_fit_with_x_axis_correction_gauss_newton(x_original: np.ndarray,
-                                                 signal: np.ndarray,
-                                                 library: np.ndarray,
-                                                 x0: float = 0,
-                                                 max_iter: int = 30,
-                                                 initial_parameters: tuple = (0,0),
-                                                 relative_tolerance = 10**(-5)):
-    d_offset = 10 ** (-6)
-    d_slope = 10 ** (-6)
-    parameters = initial_parameters
+def solve_with_gauss_newton(x_original: np.ndarray,
+                            signal: np.ndarray,
+                            library: np.ndarray,
+                            correction_model: Callable = linear_correction,
+                            max_iter: int = 30,
+                            initial_parameters: tuple = (0, 0, 0, 0, 0),
+                            relative_tolerance=10 ** (-5)):
+    step = 10 ** (-6)
+    parameters = np.array(initial_parameters)
     prediction = None
     rss_list = []
 
-
     for k in range(max_iter):
-        test_parameters = parameters
-        x_target = get_x_axis_for_interpolation(x_original, test_parameters, x0)
-        prediction, residual = nnls_fit_with_interpolation(x_original, x_target, library, signal)
 
-        test_parameters = parameters + np.array([d_slope, 0])
-        x_target = get_x_axis_for_interpolation(x_original, test_parameters, x0)
-        _, residual_slope_changed = nnls_fit_with_interpolation(x_original, x_target, library, signal)
+        x_target = correction_model(x_original, parameters)
+        prediction, residual = nnls_fit_with_interpolated_library(x_original, x_target, library, signal)
 
-        test_parameters = parameters + np.array([0, d_offset])
-        x_target = get_x_axis_for_interpolation(x_original, test_parameters, x0)
-        _, residual_offset_changed = nnls_fit_with_interpolation(x_original, x_target, library, signal)
+        jacobian = []
+        for i, parameter in enumerate(parameters):
+            test_parameters = parameters.copy()
+            test_parameters[i] += step
+            x_target = correction_model(x_original, test_parameters)
+            _, residual_after_step = nnls_fit_with_interpolated_library(x_original, x_target, library, signal)
+            gradient = (residual_after_step - residual) / step
+            jacobian.append(gradient)
+        jacobian = np.array(jacobian).T
 
-        slope_gradient = (residual_slope_changed - residual) / d_slope
-        offset_gradient = (residual_offset_changed - residual) / d_offset
-        J = np.array([slope_gradient, offset_gradient]).T
-
-        J_pseudoinverse = pinv(J.T @ J) @ J.T
-        parameter_update = J_pseudoinverse @ residual
+        jacobian_pseudoinverse = calculate_pseudoinverse(jacobian)
+        parameter_update = jacobian_pseudoinverse @ residual
         parameters = parameters - parameter_update
 
         rss_list.append(rss(residual))
 
         if len(rss_list) > 2:
-            if abs(rss_list[-2] - rss_list[-1])/rss_list[-2] < relative_tolerance:
+            if abs(rss_list[-2] - rss_list[-1]) / rss_list[-2] < relative_tolerance:
                 break
 
-
     return prediction, parameters
+
+
+def analysis(x_original: np.ndarray,
+             signal: np.ndarray,
+             library: np.ndarray,
+             ):
+    offset_candidates = np.arange(-10, 10, 1)
+    slope_candidates = np.arange(-0.1, 0.1, 0.01)
+    candidates = list(itertools.product(slope_candidates, offset_candidates))
+
+    _, parameters = solve_with_grid_search(x_original,
+                                           signal,
+                                           library,
+                                           np.array(candidates))
+    solution, parameters = solve_with_gauss_newton(x_original,
+                                                   signal,
+                                                   library,
+                                                   initial_parameters=parameters)
+    return solution, parameters

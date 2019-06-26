@@ -1,6 +1,8 @@
 import numpy as np
 from typing import Dict, List
 
+from numpy.linalg import pinv
+
 
 def calculate_mixture_signal(concentrations: Dict[str, float],
                              component_signals: Dict[str, np.ndarray]) -> np.ndarray:
@@ -32,3 +34,7 @@ def estimate_signal(prediction: np.ndarray, L: np.ndarray) -> np.ndarray:
 
 def rss(residuals: np.ndarray) -> float:
     return sum(residuals ** 2)
+
+
+def calculate_pseudoinverse(x: np.ndarray):
+    return pinv(x.T @ x) @ x.T
