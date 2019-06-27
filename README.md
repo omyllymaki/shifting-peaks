@@ -44,6 +44,7 @@ Loop:
 - Interpolate signal to new axis
 - Calculate solution using regular NNLS and interpolated signal
 - Calculate sum of residual squares
-- Check termination condition
+- Check termination 
+
 Return solution with lowest sum of residual squares 
 
