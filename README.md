@@ -39,11 +39,11 @@ produces minimum residual sum of squares. At high level, the process can be desc
 pseudocode:
 
 Loop:
-    Update correction model parameters, using grid search or optimization method
-    Generate new x-axis using current guess for correction model parameters
-    Interpolate signal to new axis
-    Calculate solution using regular NNLS and interpolated signal
-    Calculate sum of residual squares
-    Check termination condition
+- Update correction model parameters, using grid search or optimization method
+- Generate new x-axis using current guess for correction model parameters
+- Interpolate signal to new axis
+- Calculate solution using regular NNLS and interpolated signal
+- Calculate sum of residual squares
+- Check termination condition
 Return solution with lowest sum of residual squares 
 
