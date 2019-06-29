@@ -1,5 +1,5 @@
 import logging
-from typing import Callable
+from typing import Callable, Tuple
 
 import numpy as np
 
@@ -9,7 +9,10 @@ from utils import calculate_signal, rss, interpolate_array, calculate_pseudoinve
 logger = logging.getLogger(__name__)
 
 
-def nnls_fit_with_interpolated_library(x_original, x_target, library, signal):
+def nnls_fit_with_interpolated_library(x_original: np.ndarray,
+                                       x_target: np.ndarray,
+                                       library: np.ndarray,
+                                       signal: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     library_interpolated = interpolate_array(library, x_original, x_target)
     signal_copy = signal.copy()
 
@@ -30,7 +33,7 @@ def solve_with_grid_search(x_original: np.ndarray,
                            signal: np.ndarray,
                            library: np.ndarray,
                            candidates: np.ndarray,
-                           correction_model: Callable):
+                           correction_model: Callable) -> Tuple[np.ndarray, np.ndarray]:
     min_rss = float('inf')
     solution = None
     best_parameters = None
@@ -62,7 +65,7 @@ def solve_with_gauss_newton(x_original: np.ndarray,
                             min_iter: int = 10,
                             max_iter: int = 100,
                             initial_parameters: tuple = (0, 0),
-                            relative_tolerance=10 ** (-5)):
+                            relative_tolerance: float = 10 ** (-5)) -> Tuple[np.ndarray, np.ndarray]:
     step = 10 ** (-6)
     parameters = np.array(initial_parameters)
     prediction = None
@@ -109,8 +112,7 @@ def solve_with_gauss_newton(x_original: np.ndarray,
 
 def analysis(x_original: np.ndarray,
              signal: np.ndarray,
-             library: np.ndarray,
-             ):
+             library: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     offset_candidates = np.arange(-10, 10, 1)
     slope_candidates = np.arange(-0.1, 0.1, 0.01)
     candidates = get_combinations(slope_candidates, offset_candidates)
@@ -125,6 +127,7 @@ def analysis(x_original: np.ndarray,
     # Use grid search output as initial guess for Gauss-Newton method
     init_guess = (0, parameters[0], parameters[1])  # (x^2 , slope, offset)
 
+    # Use Gauss-Newton to calculate final solution
     solution, parameters = solve_with_gauss_newton(x_original,
                                                    signal,
                                                    library,

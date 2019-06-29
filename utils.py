@@ -6,11 +6,19 @@ from numpy.linalg import pinv
 from scipy.optimize import nnls
 
 
-def interpolate_signal(signal, x_original, x_target, left=np.nan, right=np.nan):
+def interpolate_signal(signal: np.ndarray,
+                       x_original: np.ndarray,
+                       x_target: np.ndarray,
+                       left: float = np.nan,
+                       right: float = np.nan) -> np.ndarray:
     return np.interp(x_target, x_original, signal, left=left, right=right)
 
 
-def interpolate_array(signal_array, x_original, x_target, left=np.nan, right=np.nan):
+def interpolate_array(signal_array: np.ndarray,
+                      x_original: np.ndarray,
+                      x_target: np.ndarray,
+                      left: float = np.nan,
+                      right: float = np.nan) -> np.ndarray:
     return np.array([interpolate_signal(s, x_original, x_target, left, right) for s in signal_array])
 
 
@@ -22,7 +30,7 @@ def rss(residuals: np.ndarray) -> float:
     return sum(residuals ** 2)
 
 
-def calculate_pseudoinverse(x: np.ndarray):
+def calculate_pseudoinverse(x: np.ndarray) -> np.ndarray:
     return pinv(x.T @ x) @ x.T
 
 
@@ -30,5 +38,5 @@ def nnls_fit(s: np.ndarray, L: np.ndarray) -> np.ndarray:
     return nnls(L.T, s)[0]
 
 
-def get_combinations(*args) -> np.ndarray:
+def get_combinations(*args: np.ndarray) -> np.ndarray:
     return np.array(list(itertools.product(*args)))
