@@ -47,7 +47,9 @@ class TestGaussNewton(unittest.TestCase):
         self.run_test(signal)
 
     def test_quadratic_error_should_pass(self) -> None:
-        self.method = partial(solve_with_gauss_newton, correction_model=quadratic_correction)
+        self.method = partial(solve_with_gauss_newton,
+                              correction_model=quadratic_correction,
+                              initial_parameters=(0, 0, 0))
         x_distorted = 0.005 * self.x ** 2 + 1.01 * self.x + 2
         signal = interpolate_signal(self.mixture_signal, self.x, x_distorted, 0, 0)
         self.run_test(signal)

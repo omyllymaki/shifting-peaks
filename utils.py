@@ -1,3 +1,5 @@
+import itertools
+
 import numpy as np
 
 from numpy.linalg import pinv
@@ -26,3 +28,7 @@ def calculate_pseudoinverse(x: np.ndarray):
 
 def nnls_fit(s: np.ndarray, L: np.ndarray) -> np.ndarray:
     return nnls(L.T, s)[0]
+
+
+def get_combinations(*args) -> np.ndarray:
+    return np.array(list(itertools.product(*args)))

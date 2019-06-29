@@ -6,6 +6,7 @@ from functools import partial
 import numpy as np
 from numpy.testing import assert_almost_equal
 
+from correction_models import linear_correction
 from file_io import load_pickle_file
 from nnls_fit_with_x_axis_correction import solve_with_grid_search
 from utils import interpolate_signal, calculate_signal
@@ -15,7 +16,7 @@ class TestGridSearch(unittest.TestCase):
     offset_candidates = np.arange(-3, 3, 0.1)
     slope_candidates = np.arange(-0.03, 0.03, 0.001)
     candidates = list(itertools.product(slope_candidates, offset_candidates))
-    method = partial(solve_with_grid_search, candidates=candidates)
+    method = partial(solve_with_grid_search, candidates=candidates, correction_model=linear_correction)
 
     def setUp(self):
         root_path = os.path.abspath(os.path.dirname(__file__))
