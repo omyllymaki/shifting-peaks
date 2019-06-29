@@ -15,6 +15,7 @@ OFFSET_ERROR_STDEV = 2
 SLOPE_ERROR_STDEV = 0.01
 QUADRATIC_ERROR_STDEV = 0.0005
 CONCENTRATIONS = [100, 500, 35]
+AMPLITUDE_NOISE = 0.2
 
 
 def gaussian(x: np.ndarray,
@@ -44,6 +45,9 @@ def generate_distorted_axis(x: np.ndarray,
 def generate_random_concentrations() -> np.ndarray:
     return np.array([c * random.random() for c in CONCENTRATIONS])
 
+def add_amplitude_noise_to_signal(signal: np.ndarray) -> np.ndarray:
+    return signal + rand(scale=AMPLITUDE_NOISE, size=len(signal))
+
 
 def generate_mixtures(library):
     mixtures_data = []
@@ -53,6 +57,7 @@ def generate_mixtures(library):
         x_distorted = generate_distorted_axis(X, OFFSET_ERROR_STDEV, SLOPE_ERROR_STDEV, QUADRATIC_ERROR_STDEV)
         mixture_signal = interpolate_signal(mixture_signal, X, x_distorted, 0, 0)
         mixture_signal = mixture_signal[KEEP_CHANNELS]
+        mixture_signal = add_amplitude_noise_to_signal(mixture_signal)
         mixtures_data.append(
             {'concentrations': concentrations,
              'signal': mixture_signal})
