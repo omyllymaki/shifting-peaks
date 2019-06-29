@@ -15,8 +15,8 @@ this fit, e.g. we can use non-negative least squares (NNLS) to make estimated co
 Measured signal contains always noise and errors which affect to accuracy of our estimates. 
 In general, random amplitude noise (y-axis noise) is handled well by NNLS. However, in some cases,
 we also have error in x-axis (time, channel, pixels, wavelength, ...) and it is not random by
-nature (peaks are shifting). This kind of error source will produce major inaccuracy to our output, 
-especially if signal shapes are narrow.
+nature. In other words, observed peaks and shapes shift from one sample to other. This kind of error 
+source will produce major inaccuracy to our output, especially if signal shapes are narrow.
 
 This project implements model based correction method to handle x-axis errors. This kind of approach
 works well when x-axis errors follow some model that is known or can be approximated. In this project,
@@ -35,8 +35,7 @@ Stage 1 is done in order ensure that gradient based optimization in stage 2 find
 
 In both stages we are looking minimum residual sum of squares by changing correction model parameters
 and doing NNLS fit afterwards. This process is repeated iteratively. Accepted solution is the one which 
-produces minimum residual sum of squares. At high level, the process can be described by following 
-pseudocode:
+produces minimum residual sum of squares. At high level, the process can be described as follows:
 
 Loop:
 - Update correction model parameters, using grid search or optimization method
