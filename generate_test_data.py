@@ -4,10 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.random import normal as rand
 
-from constants import X, PATH_PURE_COMPONENTS, PATH_MIXTURES
+from constants import PATH_PURE_COMPONENTS, PATH_MIXTURES
 from file_io import save_pickle_file
 from utils import interpolate_signal, calculate_signal
 
+X = np.arange(-50, 150)
+KEEP_CHANNELS = np.arange(50, 150)
 N_SAMPLES = 100
 OFFSET_ERROR_STDEV = 2
 SLOPE_ERROR_STDEV = 0.01
@@ -50,6 +52,7 @@ def generate_mixtures(library):
         mixture_signal = calculate_signal(concentrations, library)
         x_distorted = generate_distorted_axis(X, OFFSET_ERROR_STDEV, SLOPE_ERROR_STDEV, QUADRATIC_ERROR_STDEV)
         mixture_signal = interpolate_signal(mixture_signal, X, x_distorted, 0, 0)
+        mixture_signal = mixture_signal[KEEP_CHANNELS]
         mixtures_data.append(
             {'concentrations': concentrations,
              'signal': mixture_signal})
@@ -59,16 +62,18 @@ def generate_mixtures(library):
 def main():
     library = generate_library()
     mixtures_data = generate_mixtures(library)
+    library = library[:, KEEP_CHANNELS]
 
     plt.figure()
     for signal in library:
-        plt.plot(X, signal)
+        plt.plot(range(len(signal)), signal)
     plt.grid()
     plt.show()
 
     plt.figure()
     for sample in mixtures_data:
-        plt.plot(X, sample['signal'])
+        signal = sample['signal']
+        plt.plot(range(len(signal)), sample['signal'])
     plt.grid()
     plt.show()
 
