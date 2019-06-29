@@ -1,10 +1,12 @@
-import itertools
+import logging
 from typing import Callable
 
 import numpy as np
 
 from correction_models import linear_correction, quadratic_correction
 from utils import calculate_signal, rss, interpolate_array, calculate_pseudoinverse, nnls_fit, get_combinations
+
+logger = logging.getLogger(__name__)
 
 
 def nnls_fit_with_interpolated_library(x_original, x_target, library, signal):
@@ -37,12 +39,18 @@ def solve_with_grid_search(x_original: np.ndarray,
 
         x_target = correction_model(x_original, parameters)
         prediction, residual = nnls_fit_with_interpolated_library(x_original, x_target, library, signal)
-        current_rss = rss(residual)
+        rss_current = rss(residual)
 
-        if current_rss < min_rss:
-            min_rss = current_rss
+        if rss_current < min_rss:
+            min_rss = rss_current
             solution = prediction
             best_parameters = parameters
+
+        logger.debug(f'''
+        RSS: {rss_current}
+        Parameters: {parameters}
+        Prediction: {prediction}
+        ''')
 
     return solution, best_parameters
 
@@ -51,7 +59,8 @@ def solve_with_gauss_newton(x_original: np.ndarray,
                             signal: np.ndarray,
                             library: np.ndarray,
                             correction_model: Callable,
-                            max_iter: int = 50,
+                            min_iter: int = 10,
+                            max_iter: int = 100,
                             initial_parameters: tuple = (0, 0),
                             relative_tolerance=10 ** (-5)):
     step = 10 ** (-6)
@@ -59,7 +68,7 @@ def solve_with_gauss_newton(x_original: np.ndarray,
     prediction = None
     rss_previous = float(np.inf)
 
-    for k in range(max_iter):
+    for k in range(1, max_iter + 1):
 
         x_target = correction_model(x_original, parameters)
         prediction, residual = nnls_fit_with_interpolated_library(x_original, x_target, library, signal)
@@ -75,12 +84,25 @@ def solve_with_gauss_newton(x_original: np.ndarray,
         jacobian = np.array(jacobian).T
 
         rss_current = rss(residual)
-        if abs(rss_previous - rss_current) / rss_current < relative_tolerance:
+        if k >= min_iter and (rss_previous - rss_current) / rss_current < relative_tolerance:
+            logger.info(f'Fit converged: iteration {k}, RSS {rss_current}')
             break
 
         inverse_jacobian = calculate_pseudoinverse(jacobian)
         parameter_update = inverse_jacobian @ residual
         parameters = parameters - parameter_update
+
+        rss_previous = rss_current
+
+        logger.debug(f'''
+        Iteration: {k}
+        RSS: {rss_current}
+        Parameters: {parameters}
+        Prediction: {prediction}
+        ''')
+
+        if k == max_iter - 1:
+            logger.warning("Maximum number of iterations reached. Fit didn't converge.")
 
     return prediction, parameters
 
