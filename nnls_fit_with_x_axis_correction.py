@@ -3,7 +3,7 @@ from typing import Callable
 
 import numpy as np
 
-from correction_models import linear_correction
+from correction_models import linear_correction, quadratic_correction
 from utils import calculate_signal, rss, interpolate_array, calculate_pseudoinverse, nnls_fit
 
 
@@ -97,8 +97,11 @@ def analysis(x_original: np.ndarray,
                                            signal,
                                            library,
                                            np.array(candidates))
+
+    init_ques = (0, parameters[0], parameters[1])
     solution, parameters = solve_with_gauss_newton(x_original,
                                                    signal,
                                                    library,
-                                                   initial_parameters=parameters)
+                                                   initial_parameters=init_ques,
+                                                   correction_model=quadratic_correction)
     return solution, parameters

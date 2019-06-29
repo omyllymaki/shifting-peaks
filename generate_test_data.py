@@ -11,7 +11,7 @@ from utils import interpolate_signal, calculate_signal
 N_SAMPLES = 100
 OFFSET_ERROR_STDEV = 2
 SLOPE_ERROR_STDEV = 0.01
-QUADRATIC_ERROR_STDEV = 0
+QUADRATIC_ERROR_STDEV = 0.0005
 CONCENTRATIONS = [100, 500, 35]
 
 
