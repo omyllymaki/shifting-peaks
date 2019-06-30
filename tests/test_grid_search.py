@@ -21,10 +21,10 @@ class TestGridSearch(unittest.TestCase):
     def setUp(self):
         root_path = os.path.abspath(os.path.dirname(__file__))
         file_path = os.path.join(root_path, 'data', 'pure_components.p')
-        self.library = load_pickle_file(file_path)
-        self.x = np.arange(1, 100)
-        self.concentrations = np.array([1, 3, 5])
-        self.mixture_signal = calculate_signal(self.concentrations, self.library)
+        self.pure_components = load_pickle_file(file_path)
+        self.x = np.arange(0, 100)
+        self.contributions = np.array([1, 3, 5])
+        self.mixture_signal = calculate_signal(self.contributions, self.pure_components)
 
     def test_no_x_axis_errors_should_pass(self) -> None:
         x_distorted = self.x
@@ -46,6 +46,6 @@ class TestGridSearch(unittest.TestCase):
         signal = interpolate_signal(self.mixture_signal, self.x, x_distorted, 0, 0)
         actual, _ = self.method(self.x,
                                 signal,
-                                self.library)
-        expected = self.concentrations
+                                self.pure_components)
+        expected = self.contributions
         assert_almost_equal(actual, expected, decimal=decimal)
