@@ -15,23 +15,23 @@ OFFSET_ERROR_STDEV = 2
 SLOPE_ERROR_STDEV = 0.01
 QUADRATIC_ERROR_STDEV = 0.0005
 CONCENTRATIONS = [100, 500, 35]
-AMPLITUDE_NOISE = 0.2
+AMPLITUDE_NOISE = 1
 
 
 def gaussian(x: np.ndarray,
              amplitude: float,
              center: float,
-             sigma: float) -> np.ndarray:
-    multiplier = amplitude * (1 / (sigma * (np.sqrt(2 * np.pi))))
-    exponent = -((x - center) ** 2) / ((2 * sigma) ** 2)
-    return multiplier * np.exp(exponent)
+             fwhm: float) -> np.ndarray:
+    width = fwhm / (2 * np.log(2))
+    exponent = - ((x - center) / width) ** 2
+    return amplitude * np.exp(exponent)
 
 
 def generate_library() -> np.ndarray:
     return np.array([
         gaussian(X, 7, 20, 7),
         gaussian(X, 6, 50, 19),
-        gaussian(X, 2, 55, 2),
+        gaussian(X, 5, 55, 2),
     ])
 
 
@@ -44,6 +44,7 @@ def generate_distorted_axis(x: np.ndarray,
 
 def generate_random_concentrations() -> np.ndarray:
     return np.array([c * random.random() for c in CONCENTRATIONS])
+
 
 def add_amplitude_noise_to_signal(signal: np.ndarray) -> np.ndarray:
     return signal + rand(scale=AMPLITUDE_NOISE, size=len(signal))
