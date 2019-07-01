@@ -42,32 +42,29 @@ def generate_distorted_axis(x: np.ndarray,
     return rand(scale=offset_error) + (1 + rand(scale=slope_error)) * x + rand(scale=quadratic_error) * x ** 2
 
 
-def generate_random_contributions() -> np.ndarray:
-    return np.array([c * random.random() for c in MAX_CONTRIBUTIONS])
+def generate_random_contributions(max_contributions: list) -> np.ndarray:
+    return np.array([c * random.random() for c in max_contributions])
 
 
-def add_amplitude_noise_to_signal(signal: np.ndarray) -> np.ndarray:
-    return signal + rand(scale=AMPLITUDE_NOISE, size=len(signal))
-
-
-def generate_mixtures(pure_components):
-    mixtures_data = []
-    for _ in range(N_SAMPLES):
-        contributions = generate_random_contributions()
-        mixture_signal = calculate_signal(contributions, pure_components)
-        x_distorted = generate_distorted_axis(X, OFFSET_ERROR_STDEV, SLOPE_ERROR_STDEV, QUADRATIC_ERROR_STDEV)
-        mixture_signal = interpolate_signal(mixture_signal, X, x_distorted, 0, 0)
-        mixture_signal = mixture_signal[KEEP_CHANNELS]
-        mixture_signal = add_amplitude_noise_to_signal(mixture_signal)
-        mixtures_data.append(
-            {'contributions': contributions,
-             'signal': mixture_signal})
-    return mixtures_data
+def add_amplitude_noise_to_signal(signal: np.ndarray, noise: float) -> np.ndarray:
+    return signal + rand(scale=noise, size=len(signal))
 
 
 def main():
     pure_components = generate_pure_components()
-    mixtures_data = generate_mixtures(pure_components)
+
+    mixtures_data = []
+    for _ in range(N_SAMPLES):
+        contributions = generate_random_contributions(MAX_CONTRIBUTIONS)
+        mixture_signal = calculate_signal(contributions, pure_components)
+        x_distorted = generate_distorted_axis(X, OFFSET_ERROR_STDEV, SLOPE_ERROR_STDEV, QUADRATIC_ERROR_STDEV)
+        mixture_signal = interpolate_signal(mixture_signal, X, x_distorted, 0, 0)
+        mixture_signal = mixture_signal[KEEP_CHANNELS]
+        mixture_signal = add_amplitude_noise_to_signal(mixture_signal, AMPLITUDE_NOISE)
+        mixtures_data.append(
+            {'contributions': contributions,
+             'signal': mixture_signal})
+
     pure_components = pure_components[:, KEEP_CHANNELS]
 
     plt.figure()

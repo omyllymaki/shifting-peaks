@@ -45,7 +45,7 @@ def solve_with_grid_search(x_original: np.ndarray,
     :param candidates: Array of x axis correction parameter candidates to be tested. For each row, there is one
     parameter combination that will be tested.
     :param correction_model: Model used for x axis correction.
-    :return: Tuple containing estimated pure component contributions and parameters used to correct X axis.
+    :return: Tuple containing estimated pure component contributions and parameters used to correct x axis.
     """
     min_rss = float('inf')
     solution = None
@@ -92,7 +92,7 @@ def solve_with_gauss_newton(x_original: np.ndarray,
     :param initial_parameters: Initial guess for correction parameters in correction model.
     :param relative_tolerance: Tolerance argument for termination of optimization. Optimization is terminated if
     relative difference of RSS between current and previous iteration is smaller than this value.
-    :return: Tuple containing estimated pure component contributions and parameters used to correct X axis.
+    :return: Tuple containing estimated pure component contributions and parameters used to correct x axis.
     """
     step = 10 ** (-6)
     parameters = np.array(initial_parameters)
@@ -138,9 +138,9 @@ def solve_with_gauss_newton(x_original: np.ndarray,
     return prediction, parameters
 
 
-def analysis(x_original: np.ndarray,
-             signal: np.ndarray,
-             pure_components: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def analyze(x_original: np.ndarray,
+            signal: np.ndarray,
+            pure_components: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """
     Analyzes given signal with NLLS fit combined with x axis correction. x axis correction is done using quadratic
     model. Analysis uses grid search to make rough estimates at first and then continues with Gauss-Newton optimization
@@ -149,7 +149,7 @@ def analysis(x_original: np.ndarray,
     :param x_original: Nominal x axis without any errors.
     :param signal: Signal that needs to be analyzed.
     :param pure_components: Pure component signals. It is assumed that signal is mixture of these.
-    :return: Tuple containing estimated pure component contributions and parameters used to correct X axis.
+    :return: Tuple containing estimated pure component contributions and parameters used to correct x axis.
     """
     offset_candidates = np.arange(-10, 10, 1)
     slope_candidates = np.arange(-0.1, 0.1, 0.01)
