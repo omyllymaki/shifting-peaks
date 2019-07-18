@@ -27,8 +27,8 @@ def calculate_signal(contributions: np.ndarray, pure_component_signals: np.ndarr
     return contributions.T @ pure_component_signals
 
 
-def rss(residuals: np.ndarray) -> float:
-    return sum(residuals ** 2)
+def rsme(residuals: np.ndarray) -> float:
+    return np.sqrt(sum(residuals ** 2) / len(residuals))
 
 
 def calculate_pseudoinverse(x: np.ndarray) -> np.ndarray:

@@ -1,32 +1,19 @@
 import os
 import timeit
-import unittest
 from functools import partial
-
-import numpy as np
-from numpy.testing import assert_almost_equal
 
 from correction_models import linear_correction, quadratic_correction
 from file_io import load_pickle_file
 from nnls_fit_with_x_axis_correction import solve_with_gauss_newton
-from utils import interpolate_signal, calculate_signal
+from tests.base_test_case import BaseTestCase
+from utils import interpolate_signal
 
 
-class TestGaussNewton(unittest.TestCase):
-
-    def setUp(self):
-        root_path = os.path.abspath(os.path.dirname(__file__))
-        file_path = os.path.join(root_path, 'data', 'pure_components.p')
-        self.pure_components = load_pickle_file(file_path)
-        self.x = np.arange(0, 100)
-        self.contributions = np.array([1, 3, 5])
-        self.mixture_signal = calculate_signal(self.contributions, self.pure_components)
+class TestGaussNewton(BaseTestCase):
 
     def test_no_x_axis_errors_should_pass(self) -> None:
         self.method = partial(solve_with_gauss_newton, correction_model=linear_correction)
-        x_distorted = self.x
-        signal = interpolate_signal(self.mixture_signal, self.x, x_distorted, 0, 0)
-        self.run_test(signal)
+        self.run_test(self.mixture_signal)
 
     def test_offset_error_should_pass(self) -> None:
         self.method = partial(solve_with_gauss_newton, correction_model=linear_correction)
@@ -71,10 +58,3 @@ class TestGaussNewton(unittest.TestCase):
             self.contributions = item['contributions']
             signal = item['signal']
             self.run_test(signal, decimal=1)
-
-    def run_test(self, signal, decimal: int = 2):
-        actual, _ = self.method(self.x,
-                                signal,
-                                self.pure_components)
-        expected = self.contributions
-        assert_almost_equal(actual, expected, decimal=decimal)

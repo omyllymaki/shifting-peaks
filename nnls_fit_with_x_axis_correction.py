@@ -4,7 +4,7 @@ from typing import Callable, Tuple
 import numpy as np
 
 from correction_models import linear_correction, quadratic_correction
-from utils import calculate_signal, rss, interpolate_array, calculate_pseudoinverse, nnls_fit, get_combinations
+from utils import calculate_signal, rsme, interpolate_array, calculate_pseudoinverse, nnls_fit, get_combinations
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ def solve_with_grid_search(x_original: np.ndarray,
     :param correction_model: Model used for x axis correction.
     :return: Tuple containing estimated pure component contributions and parameters used to correct x axis.
     """
-    min_rss = float('inf')
+    min_rsme = float('inf')
     solution = None
     best_parameters = None
 
@@ -55,15 +55,15 @@ def solve_with_grid_search(x_original: np.ndarray,
 
         x_target = correction_model(x_original, parameters)
         prediction, residual = nnls_fit_with_interpolated_library(x_original, x_target, pure_components, signal)
-        rss_current = rss(residual)
+        rsme_current = rsme(residual)
 
-        if rss_current < min_rss:
-            min_rss = rss_current
+        if rsme_current < min_rsme:
+            min_rsme = rsme_current
             solution = prediction
             best_parameters = parameters
 
         logger.debug(f'''
-        RSS: {rss_current}
+        RSS: {rsme_current}
         Parameters: {parameters}
         Prediction: {prediction}
         ''')
@@ -97,7 +97,7 @@ def solve_with_gauss_newton(x_original: np.ndarray,
     step = 10 ** (-6)
     parameters = np.array(initial_parameters)
     prediction = None
-    rss_previous = float(np.inf)
+    rsme_previous = float(np.inf)
 
     for k in range(1, max_iter + 1):
 
@@ -110,24 +110,24 @@ def solve_with_gauss_newton(x_original: np.ndarray,
             test_parameters[i] += step
             x_target = correction_model(x_original, test_parameters)
             _, residual_after_step = nnls_fit_with_interpolated_library(x_original, x_target, pure_components, signal)
-            gradient = (residual_after_step - residual) / step
-            jacobian.append(gradient)
+            derivative = (residual_after_step - residual) / step
+            jacobian.append(derivative)
         jacobian = np.array(jacobian).T
 
-        rss_current = rss(residual)
-        if k >= min_iter and (rss_previous - rss_current) / rss_current < relative_tolerance:
-            logger.info(f'Fit converged: iteration {k}, RSS {rss_current}')
+        rsme_current = rsme(residual)
+        if k >= min_iter and (rsme_previous - rsme_current) / rsme_current < relative_tolerance:
+            logger.info(f'Fit converged: iteration {k}, RSME {rsme_current}')
             break
 
         inverse_jacobian = calculate_pseudoinverse(jacobian)
         parameter_update = inverse_jacobian @ residual
         parameters = parameters - parameter_update
 
-        rss_previous = rss_current
+        rsme_previous = rsme_current
 
         logger.debug(f'''
         Iteration: {k}
-        RSS: {rss_current}
+        RSME: {rsme_current}
         Parameters: {parameters}
         Prediction: {prediction}
         ''')
