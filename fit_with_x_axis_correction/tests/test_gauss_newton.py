@@ -41,7 +41,7 @@ class TestGaussNewton(BaseTestCase):
         signal = interpolate_signal(self.mixture_signal, self.x, x_distorted, 0, 0)
         self.run_test(signal)
 
-    def test_performance(self):
+    def test_speed(self):
         self.method = partial(solve_with_gauss_newton, correction_model=linear_correction)
         x_distorted = 1.01 * self.x - 2
         signal = interpolate_signal(self.mixture_signal, self.x, x_distorted, 0, 0)

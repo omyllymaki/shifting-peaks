@@ -1,3 +1,4 @@
+import timeit
 from functools import partial
 
 from fit_with_x_axis_correction.EA import solve_with_EA
@@ -30,3 +31,10 @@ class TestEA(BaseTestCase):
         x_distorted = 1.01 * self.x - 2
         signal = interpolate_signal(self.mixture_signal, self.x, x_distorted, 0, 0)
         self.run_test(signal)
+
+    def test_speed(self):
+        x_distorted = 1.01 * self.x - 2
+        signal = interpolate_signal(self.mixture_signal, self.x, x_distorted, 0, 0)
+        f = partial(self.method, x_original=self.x, signal=signal, pure_components=self.pure_components)
+        time = timeit.timeit(f, number=20)
+        self.assertLess(time, 10)
