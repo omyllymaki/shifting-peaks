@@ -3,10 +3,10 @@ from functools import partial
 
 import numpy as np
 
-from correction_models import linear_correction
-from nnls_fit_with_x_axis_correction import solve_with_grid_search
-from tests.base_test_case import BaseTestCase
-from utils import interpolate_signal
+from fit_with_x_axis_correction.correction_models import linear_correction
+from fit_with_x_axis_correction.grid_search import solve_with_grid_search
+from fit_with_x_axis_correction.tests.base_test_case import BaseTestCase
+from fit_with_x_axis_correction.common import interpolate_signal
 
 
 class TestGridSearch(BaseTestCase):

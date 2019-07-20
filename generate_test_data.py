@@ -6,7 +6,6 @@ from numpy.random import normal as rand
 
 from constants import PATH_PURE_COMPONENTS, PATH_MIXTURES
 from file_io import save_pickle_file
-from utils import interpolate_signal, calculate_signal
 
 X = np.arange(-50, 150)
 KEEP_CHANNELS = np.arange(50, 150)
@@ -16,6 +15,18 @@ SLOPE_ERROR_STDEV = 0.01
 QUADRATIC_ERROR_STDEV = 0.0005
 MAX_CONTRIBUTIONS = [100, 500, 35]
 AMPLITUDE_NOISE = 1
+
+
+def interpolate_signal(signal: np.ndarray,
+                       x_original: np.ndarray,
+                       x_target: np.ndarray,
+                       left_value: float = np.nan,
+                       right_value: float = np.nan) -> np.ndarray:
+    return np.interp(x_target, x_original, signal, left=left_value, right=right_value)
+
+
+def calculate_signal(contributions: np.ndarray, pure_component_signals: np.ndarray) -> np.ndarray:
+    return contributions.T @ pure_component_signals
 
 
 def gaussian(x: np.ndarray,

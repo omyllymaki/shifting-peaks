@@ -2,11 +2,11 @@ import os
 import timeit
 from functools import partial
 
-from correction_models import linear_correction, quadratic_correction
+from fit_with_x_axis_correction.correction_models import linear_correction, quadratic_correction
 from file_io import load_pickle_file
-from nnls_fit_with_x_axis_correction import solve_with_gauss_newton
-from tests.base_test_case import BaseTestCase
-from utils import interpolate_signal
+from fit_with_x_axis_correction.gauss_newton import solve_with_gauss_newton
+from fit_with_x_axis_correction.tests.base_test_case import BaseTestCase
+from fit_with_x_axis_correction.common import interpolate_signal
 
 
 class TestGaussNewton(BaseTestCase):
