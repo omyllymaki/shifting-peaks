@@ -3,14 +3,14 @@ from functools import partial
 
 from fit_with_x_axis_correction.EA import solve_with_EA
 from fit_with_x_axis_correction.common import interpolate_signal
-from fit_with_x_axis_correction.correction_models import quadratic_correction, linear_correction
+from fit_with_x_axis_correction.correction_models import linear_correction
 from fit_with_x_axis_correction.tests.base_test_case import BaseTestCase
 
 
 class TestEA(BaseTestCase):
     method = partial(solve_with_EA,
                      correction_model=linear_correction,
-                     rsme_threshold=0.01,
+                     rsme_threshold=0.05,
                      init_guess=(0, 0),
                      deviations=(0.1, 1))
 

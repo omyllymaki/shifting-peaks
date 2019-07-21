@@ -19,7 +19,7 @@ class BaseTestCase(unittest.TestCase):
         self.contributions = np.array([1, 3, 5])
         self.mixture_signal = calculate_signal(self.contributions, self.pure_components)
 
-    def run_test(self, signal, decimal: int = 2):
+    def run_test(self, signal, decimal: int = 1):
         actual, _ = self.method(self.x,
                                 signal,
                                 self.pure_components)

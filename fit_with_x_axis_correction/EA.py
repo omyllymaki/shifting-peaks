@@ -1,5 +1,4 @@
 import logging
-import random
 from typing import Callable, Tuple
 
 import numpy as np
@@ -16,14 +15,12 @@ def solve_with_EA(x_original: np.ndarray,
                   pure_components: np.ndarray,
                   correction_model: Callable = quadratic_correction,
                   n_population: int = 200,
-                  n_survivors: int = None,
-                  n_crossovers: int = None,
-                  n_mutations: int = None,
+                  scaled_proportion: float = 0.7,
                   init_guess: Tuple[float] = (0, 0, 0),
                   deviations: Tuple[float] = (0.01, 0.1, 1),
-                  deviations_scaling: Tuple[float] = None,
+                  deviations_scaling: np.ndarray = None,
                   n_max_generations: int = 500,
-                  rsme_threshold: float = 2,
+                  rsme_threshold: float = 1,
                   n_no_change_threshold: int = 50,
                   max_x_deviation: float = None) -> Tuple[np.ndarray, np.ndarray]:
     """
@@ -31,35 +28,13 @@ def solve_with_EA(x_original: np.ndarray,
     x axis correction parameters are found using evolutionary algorithm.
 
 
-    :param x_original:
-    :param signal:
-    :param pure_components:
-    :param correction_model:
-    :param n_population:
-    :param n_survivors:
-    :param n_crossovers:
-    :param n_mutations:
-    :param init_guess:
-    :param deviations:
-    :param deviations_scaling:
-    :param n_max_generations:
-    :param rsme_threshold:
-    :param n_no_change_threshold:
-    :param max_x_deviation:
-    :return:
     """
 
-    # Initialize arguments
-    if not n_survivors:
-        n_survivors = n_population // 10
-    if not n_crossovers:
-        n_crossovers = n_survivors
-    if not n_mutations:
-        n_mutations = n_population // 2
+    # Initialize optional arguments if not given
     if not max_x_deviation:
         max_x_deviation = (max(x_original) - min(x_original)) // 2
     if not deviations_scaling:
-        deviations_scaling = [1 / k for k in range(1, n_max_generations + 1)]
+        deviations_scaling = np.array([1 / k for k in range(1, n_max_generations + 1)])
 
     # Initialize parameter candidates
     parameters = []
@@ -113,19 +88,16 @@ def solve_with_EA(x_original: np.ndarray,
             logger.warning(f"Maximum number of generations reached. Iteration terminated at round {round}.")
             break
 
-        # Take some best parameters (survivors)
-        sorted_indices = np.argsort(rsme_values)
-        survivors = parameters[sorted_indices][:n_survivors]
-        best_parameters = survivors[0]
+        # Find best parameter combination
+        index_lowest_rsme = np.argmin(rsme_values)
+        best_parameters = parameters[index_lowest_rsme]
 
         # Generate new parameter combinations
         parameters = []
         parameters.append(best_parameters)
         scale = deviations_scaling[round]
-        for _ in range(n_crossovers):
-            candidate = [random.choice(column) for column in survivors.T]
-            parameters.append(candidate)
-        for _ in range(n_mutations):
+        n_scaled = int(scaled_proportion * n_population)
+        for _ in range(n_scaled):
             candidate = [normal(loc=mean, scale=scale * stdev) for mean, stdev in zip(best_parameters, deviations)]
             parameters.append(candidate)
         for _ in range(n_population - len(parameters)):
