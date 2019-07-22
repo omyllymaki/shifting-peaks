@@ -5,7 +5,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal
 
 from file_io import load_pickle_file
-from fit_with_x_axis_correction.common import calculate_signal
+from solvers.common import calculate_signal
 
 
 class BaseTestCase(unittest.TestCase):

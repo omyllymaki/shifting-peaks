@@ -3,10 +3,10 @@ from typing import Tuple
 
 import numpy as np
 
-from fit_with_x_axis_correction.correction_models import linear_correction, quadratic_correction
-from fit_with_x_axis_correction.gauss_newton import solve_with_gauss_newton
-from fit_with_x_axis_correction.grid_search import solve_with_grid_search
-from fit_with_x_axis_correction.common import get_combinations
+from solvers.correction_models import linear_correction, quadratic_correction
+from solvers.gauss_newton import solve_with_gauss_newton
+from solvers.grid_search import solve_with_grid_search
+from solvers.common import get_combinations
 
 logger = logging.getLogger(__name__)
 

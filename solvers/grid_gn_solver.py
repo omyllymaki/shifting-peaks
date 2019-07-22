@@ -2,11 +2,11 @@ from typing import Tuple
 
 import numpy as np
 
-from fit_with_x_axis_correction.gn_solver import GNSolver
-from fit_with_x_axis_correction.common import get_combinations
-from fit_with_x_axis_correction.correction_models import linear_correction, quadratic_correction
-from fit_with_x_axis_correction.grid_solver import GridSolver
-from fit_with_x_axis_correction.solver_interface import SolverInterface
+from solvers.gn_solver import GNSolver
+from solvers.common import get_combinations
+from solvers.correction_models import linear_correction, quadratic_correction
+from solvers.grid_solver import GridSolver
+from solvers.solver_interface import SolverInterface
 
 
 class GridGNSolver(SolverInterface):

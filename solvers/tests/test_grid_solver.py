@@ -2,10 +2,10 @@ import itertools
 
 import numpy as np
 
-from fit_with_x_axis_correction.common import interpolate_signal
-from fit_with_x_axis_correction.correction_models import linear_correction
-from fit_with_x_axis_correction.grid_solver import GridSolver
-from fit_with_x_axis_correction.tests.base_test_case import BaseTestCase
+from solvers.common import interpolate_signal
+from solvers.correction_models import linear_correction
+from solvers.grid_solver import GridSolver
+from solvers.tests.base_test_case import BaseTestCase
 
 
 class TestGridSolver(BaseTestCase):

@@ -3,8 +3,8 @@ from typing import Callable, Tuple
 import numpy as np
 from numpy.random import normal
 
-from fit_with_x_axis_correction.common import nnls_fit_with_interpolated_library, rsme
-from fit_with_x_axis_correction.solver_interface import SolverInterface
+from solvers.common import nnls_fit_with_interpolated_library, rsme
+from solvers.solver_interface import SolverInterface
 
 
 class EASolver(SolverInterface):

@@ -2,8 +2,8 @@ from typing import Callable, Tuple
 
 import numpy as np
 
-from fit_with_x_axis_correction.common import nnls_fit_with_interpolated_library, rsme, calculate_pseudoinverse
-from fit_with_x_axis_correction.solver_interface import SolverInterface
+from solvers.common import nnls_fit_with_interpolated_library, rsme, calculate_pseudoinverse
+from solvers.solver_interface import SolverInterface
 
 
 class GNSolver(SolverInterface):

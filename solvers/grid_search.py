@@ -3,7 +3,7 @@ from typing import Callable, Tuple
 
 import numpy as np
 
-from fit_with_x_axis_correction.common import nnls_fit_with_interpolated_library, rsme
+from solvers.common import nnls_fit_with_interpolated_library, rsme
 
 logger = logging.getLogger(__name__)
 

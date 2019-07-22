@@ -3,10 +3,10 @@ import timeit
 from functools import partial
 
 from file_io import load_pickle_file
-from fit_with_x_axis_correction.gn_solver import GNSolver
-from fit_with_x_axis_correction.common import interpolate_signal
-from fit_with_x_axis_correction.correction_models import quadratic_correction
-from fit_with_x_axis_correction.tests.base_test_case import BaseTestCase
+from solvers.gn_solver import GNSolver
+from solvers.common import interpolate_signal
+from solvers.correction_models import quadratic_correction
+from solvers.tests.base_test_case import BaseTestCase
 
 
 class TestGNSolver(BaseTestCase):

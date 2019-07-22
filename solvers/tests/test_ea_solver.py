@@ -1,10 +1,10 @@
 import timeit
 from functools import partial
 
-from fit_with_x_axis_correction.ea_solver import EASolver
-from fit_with_x_axis_correction.common import interpolate_signal
-from fit_with_x_axis_correction.correction_models import linear_correction
-from fit_with_x_axis_correction.tests.base_test_case import BaseTestCase
+from solvers.ea_solver import EASolver
+from solvers.common import interpolate_signal
+from solvers.correction_models import linear_correction
+from solvers.tests.base_test_case import BaseTestCase
 
 
 class TestEASolver(BaseTestCase):
