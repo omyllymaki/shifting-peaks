@@ -1,19 +1,24 @@
 import itertools
-from functools import partial
 
 import numpy as np
 
-from fit_with_x_axis_correction.correction_models import linear_correction
-from fit_with_x_axis_correction.grid_search import solve_with_grid_search
-from fit_with_x_axis_correction.tests.base_test_case import BaseTestCase
 from fit_with_x_axis_correction.common import interpolate_signal
+from fit_with_x_axis_correction.correction_models import linear_correction
+from fit_with_x_axis_correction.grid_solver import GridSolver
+from fit_with_x_axis_correction.tests.base_test_case import BaseTestCase
 
 
-class TestGridSearch(BaseTestCase):
+class TestGridSolver(BaseTestCase):
     offset_candidates = np.arange(-3, 3, 0.1)
     slope_candidates = np.arange(-0.03, 0.03, 0.001)
-    candidates = list(itertools.product(slope_candidates, offset_candidates))
-    method = partial(solve_with_grid_search, candidates=candidates, correction_model=linear_correction)
+    candidates = np.array(list(itertools.product(slope_candidates, offset_candidates)))
+
+    def setUp(self):
+        super().setUp()
+        self.solver = GridSolver(x=self.x,
+                                 pure_components=self.pure_components,
+                                 candidates=self.candidates,
+                                 correction_model=linear_correction)
 
     def test_no_x_axis_errors_should_pass(self) -> None:
         self.run_test(self.mixture_signal)

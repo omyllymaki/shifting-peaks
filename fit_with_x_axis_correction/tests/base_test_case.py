@@ -9,7 +9,7 @@ from fit_with_x_axis_correction.common import calculate_signal
 
 
 class BaseTestCase(unittest.TestCase):
-    method = None
+    solver = None
 
     def setUp(self):
         root_path = os.path.abspath(os.path.dirname(__file__))
@@ -20,8 +20,6 @@ class BaseTestCase(unittest.TestCase):
         self.mixture_signal = calculate_signal(self.contributions, self.pure_components)
 
     def run_test(self, signal, decimal: int = 1):
-        actual, _ = self.method(self.x,
-                                signal,
-                                self.pure_components)
+        actual, _ = self.solver.solve(signal)
         expected = self.contributions
         assert_almost_equal(actual, expected, decimal=decimal)
