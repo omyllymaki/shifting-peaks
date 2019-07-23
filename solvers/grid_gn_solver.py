@@ -2,14 +2,14 @@ from typing import Tuple
 
 import numpy as np
 
-from solvers.gn_solver import GNSolver
+from solvers.base_solver import BaseSolver
 from solvers.common import get_combinations
 from solvers.correction_models import linear_correction, quadratic_correction
+from solvers.gn_solver import GNSolver
 from solvers.grid_solver import GridSolver
-from solvers.solver_interface import SolverInterface
 
 
-class GridGNSolver(SolverInterface):
+class GridGNSolver(BaseSolver):
     def __init__(self,
                  x: np.ndarray,
                  pure_components: np.ndarray):
@@ -25,7 +25,7 @@ class GridGNSolver(SolverInterface):
                                   pure_components=pure_components,
                                   correction_model=quadratic_correction)
 
-    def solve(self, signal: np.ndarray, *args) -> Tuple[np.ndarray, np.ndarray]:
+    def solve(self, signal: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         # Find rough estimates for slope and offset using grid search
         _, parameters = self.grid_solver.solve(signal)
 

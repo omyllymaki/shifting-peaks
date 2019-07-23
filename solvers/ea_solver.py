@@ -3,11 +3,11 @@ from typing import Callable, Tuple
 import numpy as np
 from numpy.random import normal
 
+from solvers.base_solver import BaseSolver
 from solvers.common import nnls_fit_with_interpolated_library, rsme
-from solvers.solver_interface import SolverInterface
 
 
-class EASolver(SolverInterface):
+class EASolver(BaseSolver):
     def __init__(self,
                  x: np.ndarray,
                  pure_components: np.ndarray,
@@ -40,9 +40,9 @@ class EASolver(SolverInterface):
         if not deviations_scaling:
             self.deviations_scaling = np.array([1 / k for k in range(1, n_max_generations + 1)])
 
-    def solve(self,
-              signal,
-              *args) -> Tuple[np.ndarray, np.ndarray]:
+    def solve(self, signal) -> Tuple[np.ndarray, np.ndarray]:
+
+        self.signal = signal
 
         # Initialize parameter candidates
         parameters = []
@@ -63,18 +63,11 @@ class EASolver(SolverInterface):
             rsme_values = []
 
             for candidate in parameters:
-                x_target = self.correction_model(self.x, candidate)
-
-                # Check that interpolated x axis is within accepted range
-                if abs(min(x_target) - min(self.x)) > self.max_x_deviation:
-                    rsme_values.append(float(np.inf))
-                    continue
-                if abs(max(x_target) - max(self.x)) > self.max_x_deviation:
-                    rsme_values.append(float(np.inf))
-                    continue
-
-                solution, residual = nnls_fit_with_interpolated_library(self.x, x_target, self.pure_components, signal)
-                rsme_value = rsme(residual)
+                solution, residual = self.fit_with_shifted_axis(candidate)
+                if residual is None:
+                    rsme_value = float(np.inf)
+                else:
+                    rsme_value = rsme(residual)
                 rsme_values.append(rsme_value)
 
                 # Update solution if RSME is smaller than current minimum

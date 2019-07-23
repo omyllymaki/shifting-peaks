@@ -2,11 +2,11 @@ from typing import Callable, Tuple
 
 import numpy as np
 
-from solvers.common import nnls_fit_with_interpolated_library, rsme
-from solvers.solver_interface import SolverInterface
+from solvers.base_solver import BaseSolver
+from solvers.common import rsme
 
 
-class GridSolver(SolverInterface):
+class GridSolver(BaseSolver):
     def __init__(self,
                  x: np.ndarray,
                  pure_components: np.ndarray,
@@ -17,16 +17,16 @@ class GridSolver(SolverInterface):
         self.candidates = candidates
         self.correction_model = correction_model
 
-    def solve(self, signal: np.ndarray, *args) -> Tuple[np.ndarray, np.ndarray]:
+    def solve(self, signal: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 
+        self.signal = signal
         min_rsme = float('inf')
         solution = None
         best_parameters = None
 
         for parameters in self.candidates:
 
-            x_target = self.correction_model(self.x, parameters)
-            prediction, residual = nnls_fit_with_interpolated_library(self.x, x_target, self.pure_components, signal)
+            prediction, residual = self.fit_with_shifted_axis(parameters)
             rsme_current = rsme(residual)
 
             if rsme_current < min_rsme:
@@ -36,7 +36,7 @@ class GridSolver(SolverInterface):
 
             self.logger.debug(f'''
                RSS: {rsme_current}
-               Parameters: {parameters}
+               Parameters: {self.parameters}
                Prediction: {prediction}
                ''')
 

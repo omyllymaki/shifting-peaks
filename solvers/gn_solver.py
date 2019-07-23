@@ -2,11 +2,11 @@ from typing import Callable, Tuple
 
 import numpy as np
 
+from solvers.base_solver import BaseSolver
 from solvers.common import nnls_fit_with_interpolated_library, rsme, calculate_pseudoinverse
-from solvers.solver_interface import SolverInterface
 
 
-class GNSolver(SolverInterface):
+class GNSolver(BaseSolver):
     def __init__(self,
                  x: np.ndarray,
                  pure_components: np.ndarray,
@@ -26,24 +26,20 @@ class GNSolver(SolverInterface):
               signal,
               initial_parameters: Tuple = (0, 0, 0)) -> Tuple[np.ndarray, np.ndarray]:
         step = 10 ** (-6)
-        parameters = np.array(initial_parameters)
         prediction = None
         rsme_previous = float(np.inf)
+        parameters = np.array(initial_parameters)
+        self.signal = signal
 
         for k in range(1, self.max_iter + 1):
 
-            x_target = self.correction_model(self.x, parameters)
-            prediction, residual = nnls_fit_with_interpolated_library(self.x, x_target, self.pure_components, signal)
+            prediction, residual = self.fit_with_shifted_axis(parameters)
 
             jacobian = []
             for i, parameter in enumerate(parameters):
                 test_parameters = parameters.copy()
                 test_parameters[i] += step
-                x_target = self.correction_model(self.x, test_parameters)
-                _, residual_after_step = nnls_fit_with_interpolated_library(self.x,
-                                                                            x_target,
-                                                                            self.pure_components,
-                                                                            signal)
+                _, residual_after_step = self.fit_with_shifted_axis(test_parameters)
                 derivative = (residual_after_step - residual) / step
                 jacobian.append(derivative)
             jacobian = np.array(jacobian).T
@@ -62,7 +58,7 @@ class GNSolver(SolverInterface):
             self.logger.debug(f'''
                 Iteration: {k}
                 RSME: {rsme_current}
-                Parameters: {parameters}
+                Parameters: {self.parameters}
                 Prediction: {prediction}
                 ''')
 
