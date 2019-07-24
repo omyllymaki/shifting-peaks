@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Callable
 
 import numpy as np
 from numpy.linalg import pinv
@@ -56,3 +56,18 @@ def nnls_fit_with_interpolated_library(x_original: np.ndarray,
     residual = estimate - signal_copy
 
     return prediction, residual
+
+
+def calculate_jacobian_matrix(parameters: np.ndarray, func: Callable, step: float = 10 ** (-6)) -> np.ndarray:
+    prediction, residual = func(parameters)
+
+    jacobian = []
+    for i, parameter in enumerate(parameters):
+        test_parameters = parameters.copy()
+        test_parameters[i] += step
+        _, residual_after_step = func(test_parameters)
+        derivative = (residual_after_step - residual) / step
+        jacobian.append(derivative)
+    jacobian = np.array(jacobian).T
+
+    return jacobian
