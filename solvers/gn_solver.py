@@ -3,7 +3,7 @@ from typing import Callable, Tuple
 import numpy as np
 
 from solvers.base_solver import BaseSolver
-from solvers.common import nnls_fit_with_interpolated_library, rsme, calculate_pseudoinverse
+from solvers.math import rsme, calculate_pseudoinverse
 
 
 class GNSolver(BaseSolver):

@@ -4,7 +4,7 @@ from functools import partial
 
 from file_io import load_pickle_file
 from solvers.gn_solver import GNSolver
-from solvers.common import interpolate_signal
+from solvers.math import interpolate_signal
 from solvers.correction_models import quadratic_correction
 from solvers.tests.base_test_case import BaseTestCase
 

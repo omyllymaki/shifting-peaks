@@ -4,7 +4,7 @@ import numpy as np
 from numpy.random import normal
 
 from solvers.base_solver import BaseSolver
-from solvers.common import nnls_fit_with_interpolated_library, rsme
+from solvers.math import rsme
 
 
 class EASolver(BaseSolver):

@@ -3,7 +3,7 @@ from typing import Callable, Tuple
 import numpy as np
 
 from solvers.base_solver import BaseSolver
-from solvers.common import rsme
+from solvers.math import rsme
 
 
 class GridSolver(BaseSolver):

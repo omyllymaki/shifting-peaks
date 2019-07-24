@@ -3,7 +3,7 @@ from typing import Tuple, Optional
 
 import numpy as np
 
-from solvers.common import nnls_fit_with_interpolated_library
+from solvers.math import nnls_fit_with_interpolated_library
 
 
 class BaseSolver:

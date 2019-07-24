@@ -1,9 +1,9 @@
+import itertools
 from typing import Tuple
 
 import numpy as np
 
 from solvers.base_solver import BaseSolver
-from solvers.common import get_combinations
 from solvers.correction_models import linear_correction, quadratic_correction
 from solvers.gn_solver import GNSolver
 from solvers.grid_solver import GridSolver
@@ -15,7 +15,7 @@ class GridGNSolver(BaseSolver):
                  pure_components: np.ndarray):
         offset_candidates = np.arange(-10, 10, 1)
         slope_candidates = np.arange(-0.1, 0.1, 0.01)
-        candidates_array = get_combinations(slope_candidates, offset_candidates)
+        candidates_array = self.get_combinations(slope_candidates, offset_candidates)
 
         self.grid_solver = GridSolver(x=x,
                                       pure_components=pure_components,
@@ -37,3 +37,7 @@ class GridGNSolver(BaseSolver):
         solution, parameters = self.gn_solver.solve(signal=signal, initial_parameters=init_guess)
 
         return solution, parameters
+
+    @staticmethod
+    def get_combinations(*args: np.ndarray) -> np.ndarray:
+        return np.array(list(itertools.product(*args)))
