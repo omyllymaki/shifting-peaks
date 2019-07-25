@@ -58,16 +58,16 @@ def nnls_fit_with_interpolated_library(x_original: np.ndarray,
     return prediction, residual
 
 
-def calculate_jacobian_matrix(parameters: np.ndarray, func: Callable, step: float = 10 ** (-6)) -> np.ndarray:
-    prediction, residual = func(parameters)
+def calculate_gradient(x: np.ndarray, func: Callable, step: float = 10 ** (-6)) -> np.ndarray:
+    _, residual = func(x)
 
-    jacobian = []
-    for i, parameter in enumerate(parameters):
-        test_parameters = parameters.copy()
-        test_parameters[i] += step
-        _, residual_after_step = func(test_parameters)
+    gradient = []
+    for i, parameter in enumerate(x):
+        xt = x.copy()
+        xt[i] += step
+        _, residual_after_step = func(xt)
         derivative = (residual_after_step - residual) / step
-        jacobian.append(derivative)
-    jacobian = np.array(jacobian).T
+        gradient.append(derivative)
+    gradient = np.array(gradient).T
 
-    return jacobian
+    return gradient

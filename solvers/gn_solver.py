@@ -3,7 +3,7 @@ from typing import Callable, Tuple
 import numpy as np
 
 from solvers.base_solver import BaseSolver
-from solvers.math import rsme, calculate_pseudoinverse, calculate_jacobian_matrix
+from solvers.math import rsme, calculate_pseudoinverse, calculate_gradient
 
 
 class GNSolver(BaseSolver):
@@ -22,37 +22,52 @@ class GNSolver(BaseSolver):
         self.max_iter = max_iter
         self.relative_tolerance = relative_tolerance
 
+        self.iteration_round = None
+        self.rsme_previous = None
+        self.rsme_current = None
+
     def solve(self,
               signal,
               initial_parameters: Tuple = (0, 0, 0)) -> Tuple[np.ndarray, np.ndarray]:
+
         prediction = None
-        rsme_previous = float(np.inf)
+        self.rsme_previous = float(np.inf)
         parameters = np.array(initial_parameters)
         self.signal = signal
 
-        for k in range(1, self.max_iter + 1):
+        for self.iteration_round in range(1, self.max_iter + 1):
 
             prediction, residual = self.fit_with_shifted_axis(parameters)
-
-            rsme_current = rsme(residual)
-            if k >= self.min_iter and (rsme_previous - rsme_current) / rsme_current < self.relative_tolerance:
-                self.logger.info(f'Fit converged: iteration {k}, RSME {rsme_current}')
-                break
-
-            jacobian = calculate_jacobian_matrix(parameters, self.fit_with_shifted_axis)
-            inverse_jacobian = calculate_pseudoinverse(jacobian)
-            parameter_update = inverse_jacobian @ residual
-            parameters = parameters - parameter_update
-            rsme_previous = rsme_current
+            self.rsme_current = rsme(residual)
 
             self.logger.debug(f'''
-                Iteration: {k}
-                RSME: {rsme_current}
+                Iteration: {self.iteration_round}
+                RSME: {self.rsme_current}
                 Parameters: {self.parameters}
                 Prediction: {prediction}
                 ''')
 
-            if k == self.max_iter - 1:
-                self.logger.warning("Maximum number of iterations reached. Fit didn't converge.")
+            if self._is_termination_condition_filled():
+                break
+
+            parameters = self._update_parameters(parameters, residual)
+            self.rsme_previous = self.rsme_current
 
         return prediction, parameters
+
+    def _update_parameters(self, parameters, residual):
+        jacobian = calculate_gradient(parameters, self.fit_with_shifted_axis)
+        inverse_jacobian = calculate_pseudoinverse(jacobian)
+        parameter_update = inverse_jacobian @ residual
+        parameters = parameters - parameter_update
+        return parameters
+
+    def _is_termination_condition_filled(self):
+        rsme_relative_change = (self.rsme_previous - self.rsme_current) / self.rsme_current
+        if self.iteration_round >= self.min_iter and rsme_relative_change < self.relative_tolerance:
+            self.logger.info(f'Fit converged: iteration {self.iteration_round}, RSME {self.rsme_current}')
+            return True
+        if self.iteration_round == self.max_iter - 1:
+            self.logger.warning("Maximum number of iterations reached. Fit didn't converge.")
+            return True
+        return False
