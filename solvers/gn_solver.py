@@ -3,7 +3,7 @@ from typing import Callable, Tuple
 import numpy as np
 
 from solvers.base_solver import BaseSolver
-from solvers.math import rsme, calculate_pseudoinverse, calculate_gradient
+from solvers.math import rsme, calculate_pseudoinverse, calculate_partial_derivatives
 
 
 class GNSolver(BaseSolver):
@@ -56,7 +56,8 @@ class GNSolver(BaseSolver):
         return prediction, parameters
 
     def _update_parameters(self, parameters, residual):
-        jacobian = calculate_gradient(parameters, self.fit_with_shifted_axis)
+        func = lambda x: self.fit_with_shifted_axis(x)[1]       # returns only residual
+        jacobian = calculate_partial_derivatives(parameters, func)
         inverse_jacobian = calculate_pseudoinverse(jacobian)
         parameter_update = inverse_jacobian @ residual
         parameters = parameters - parameter_update

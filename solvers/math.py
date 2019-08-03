@@ -58,16 +58,16 @@ def nnls_fit_with_interpolated_library(x_original: np.ndarray,
     return prediction, residual
 
 
-def calculate_gradient(x: np.ndarray, func: Callable, step: float = 10 ** (-6)) -> np.ndarray:
-    _, residual = func(x)
+def calculate_partial_derivatives(x0: np.ndarray, func: Callable, step: float = 10 ** (-6)) -> np.ndarray:
+    y0 = func(x0)
 
-    gradient = []
-    for i, parameter in enumerate(x):
-        xt = x.copy()
-        xt[i] += step
-        _, residual_after_step = func(xt)
-        derivative = (residual_after_step - residual) / step
-        gradient.append(derivative)
-    gradient = np.array(gradient).T
+    partial_derivatives = []
+    for i, parameter in enumerate(x0):
+        x = x0.copy()
+        x[i] += step
+        y = func(x)
+        derivative = (y - y0) / step
+        partial_derivatives.append(derivative)
+    partial_derivatives = np.array(partial_derivatives).T
 
-    return gradient
+    return partial_derivatives
