@@ -5,24 +5,46 @@ are illustrated with synthetic data.
 
 ## Background
 
-Let's assume, for simplicity, that measured signal is linear combination of overlapping components 
-and that contributions of components are non-negative. The target is to extract amounts of different 
-components from measured signal.
-
-One of the common approaches to solve the problem is to do classical least squares (CLS) fit where
-we estimate amount of different components by minimising residual sum of squares. We can also constrain 
-this fit, e.g. we can use non-negative least squares (NNLS) to make estimated component amounts non-negative.
+The target of curve fitting is to extract amounts of different components from measured signal.
 
 Measured signal contains always noise and errors which affect to accuracy of our estimates. 
-In general, random amplitude noise (y-axis noise) is handled well by NNLS. However, in some cases,
+In general, random amplitude noise (y-axis noise) is handled well by curve fitting methods. However, in some cases,
 we also have error in x-axis (time, channel, pixels, wavelength, ...) and it is not random by
-nature. In other words, observed peaks and shapes shift from one sample to other. This kind of error 
-source will produce major inaccuracy to our output, especially if signal shapes are narrow.
+nature. In other words, observed peaks and shapes shift from one sample to other according to some model. This kind of 
+error source will produce major inaccuracy to our output, especially if signal shapes are narrow.
 
 This project implements model based correction method to handle x-axis errors. This kind of approach
 works well when x-axis errors follow some model that is known or can be approximated. In this project,
 the synthetic data set has quadratic errors (y = a*x^2 + b*x + c) but usage of the method is not limited
 to polynomial models.
+
+
+## Requirements
+
+- Python 3.6 (probably works also with older and newer versions)
+- Python libraries: numpy, scipy, matplotlib
+
+Install requirements by running
+
+```
+pip install -r requirements.txt
+```
+
+
+## Usage
+
+Just run analysis sample:
+
+```
+python analysis_sample.py
+```
+
+You can also generate your own data set:
+
+```
+python generate_test_data.py
+```
+
 
 ## Algorithms
 
