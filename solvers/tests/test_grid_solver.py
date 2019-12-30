@@ -2,9 +2,9 @@ import itertools
 
 import numpy as np
 
-from solvers.math import interpolate_signal
 from solvers.correction_models import linear_correction
 from solvers.grid_solver import GridSolver
+from solvers.math import interpolate_signal, ls_fit
 from solvers.tests.base_test_case import BaseTestCase
 
 
@@ -18,7 +18,8 @@ class TestGridSolver(BaseTestCase):
         self.solver = GridSolver(x=self.x,
                                  pure_components=self.pure_components,
                                  candidates=self.candidates,
-                                 correction_model=linear_correction)
+                                 correction_model=linear_correction,
+                                 fit_function=ls_fit)
 
     def test_no_x_axis_errors_should_pass(self) -> None:
         self.run_test(self.mixture_signal)

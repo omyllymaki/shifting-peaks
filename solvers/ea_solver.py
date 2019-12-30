@@ -4,7 +4,7 @@ import numpy as np
 from numpy.random import normal
 
 from solvers.base_solver import BaseSolver
-from solvers.math import rsme
+from solvers.math import rsme, ls_fit
 
 
 class EASolver(BaseSolver):
@@ -20,11 +20,11 @@ class EASolver(BaseSolver):
                  n_max_generations: int = 500,
                  rsme_threshold: float = 1,
                  n_no_change_threshold: int = 50,
-                 max_x_deviation: float = None
+                 max_x_deviation: float = None,
+                 fit_function: Callable = ls_fit
                  ):
         self.x = x
         self.pure_components = pure_components
-        self.correction_model = correction_model
         self.n_population = n_population
         self.scaled_proportion = scaled_proportion
         self.init_guess = init_guess
@@ -34,6 +34,8 @@ class EASolver(BaseSolver):
         self.n_no_change_threshold = n_no_change_threshold
         self.max_x_deviation = max_x_deviation
         self.deviations_scaling = deviations_scaling
+
+        super().__init__(correction_model, fit_function)
 
         if not max_x_deviation:
             self.max_x_deviation = (max(x) - min(x)) // 2

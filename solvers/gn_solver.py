@@ -3,7 +3,7 @@ from typing import Callable, Tuple
 import numpy as np
 
 from solvers.base_solver import BaseSolver
-from solvers.math import rsme, calculate_pseudoinverse, calculate_partial_derivatives
+from solvers.math import rsme, calculate_pseudoinverse, calculate_partial_derivatives, ls_fit
 
 
 class GNSolver(BaseSolver):
@@ -13,11 +13,11 @@ class GNSolver(BaseSolver):
                  correction_model: Callable,
                  min_iter: int = 10,
                  max_iter: int = 100,
-                 relative_tolerance: float = 10 ** (-5)
+                 relative_tolerance: float = 10 ** (-5),
+                 fit_function: Callable = ls_fit,
                  ):
         self.x = x
         self.pure_components = pure_components
-        self.correction_model = correction_model
         self.min_iter = min_iter
         self.max_iter = max_iter
         self.relative_tolerance = relative_tolerance
@@ -25,6 +25,8 @@ class GNSolver(BaseSolver):
         self.iteration_round = None
         self.rsme_previous = None
         self.rsme_current = None
+
+        super().__init__(correction_model, fit_function)
 
     def solve(self,
               signal,

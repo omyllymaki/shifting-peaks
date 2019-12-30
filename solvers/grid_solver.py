@@ -3,7 +3,7 @@ from typing import Callable, Tuple
 import numpy as np
 
 from solvers.base_solver import BaseSolver
-from solvers.math import rsme
+from solvers.math import rsme, ls_fit
 
 
 class GridSolver(BaseSolver):
@@ -11,11 +11,14 @@ class GridSolver(BaseSolver):
                  x: np.ndarray,
                  pure_components: np.ndarray,
                  candidates: np.ndarray,
-                 correction_model: Callable):
+                 correction_model: Callable,
+                 fit_function: Callable = ls_fit,
+                 ):
         self.x = x
         self.pure_components = pure_components
         self.candidates = candidates
-        self.correction_model = correction_model
+
+        super().__init__(correction_model, fit_function)
 
     def solve(self, signal: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 

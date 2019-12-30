@@ -3,9 +3,9 @@ import timeit
 from functools import partial
 
 from file_io import load_pickle_file
-from solvers.gn_solver import GNSolver
-from solvers.math import interpolate_signal
 from solvers.correction_models import quadratic_correction
+from solvers.gn_solver import GNSolver
+from solvers.math import interpolate_signal, ls_fit
 from solvers.tests.base_test_case import BaseTestCase
 
 
@@ -15,7 +15,8 @@ class TestGNSolver(BaseTestCase):
         super().setUp()
         self.solver = GNSolver(x=self.x,
                                pure_components=self.pure_components,
-                               correction_model=quadratic_correction)
+                               correction_model=quadratic_correction,
+                               fit_function=ls_fit)
 
     def test_no_x_axis_errors_should_pass(self) -> None:
         self.run_test(self.mixture_signal)
