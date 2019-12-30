@@ -18,10 +18,30 @@ class BaseSolver:
     def __init__(self,
                  correction_model: Callable,
                  fit_function: Callable = ls_fit):
+        """
+        :param correction_model:
+        Model for x axis correction.
+        (x: np.ndarray, coefficients: np.ndarray) -> x_corrected: np.ndarray
+        E.g.
+        def linear_correction(x, coefficients):
+            return (coefficients[0] + 1) * x + coefficients[1]
+
+        :param fit_function:
+        Curve fitting function.
+        (signal: np.ndarray, pure_component_signals: np.ndarray) -> contributions: np.ndarray
+        E.g.
+        def nnls_fit(signal, pure_component_signals):
+            return scipy.optimize.nnls(pure_component_signals.T, signal)[0]
+
+        """
         self.correction_model = correction_model
         self.fit_function = fit_function
 
     def solve(self, signal: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        :param signal: Mixture signal of pure components.
+        :return: Tuple[Contributions of pure components, fitted x axis correction parameters].
+        """
         raise NotImplementedError
 
     def fit_with_shifted_axis(self, parameters: np.ndarray) -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]:
