@@ -2,21 +2,27 @@ import logging
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from constants import PATH_PURE_COMPONENTS, PATH_MIXTURES, X
 from file_io import load_pickle_file
-from solvers.correction_models import quadratic_correction
-from solvers.gn_solver import GNSolver
-from solvers.math import nnls_fit
+from grid_gn_solver import GridGNSolver
+from scipy.optimize import nnls
 
 logging.basicConfig(level=logging.WARNING)
+
+
+def quadratic_correction(x: np.ndarray, coefficients: np.ndarray) -> np.ndarray:
+    return coefficients[0] * x ** 2 + (coefficients[1] + 1) * x + coefficients[2]
+
+
+def nnls_fit(signal: np.ndarray, pure_component_signals: np.ndarray) -> np.ndarray:
+    return nnls(pure_component_signals.T, signal)[0]
 
 
 def main():
     pure_components = load_pickle_file(PATH_PURE_COMPONENTS)
     mixtures_data = load_pickle_file(PATH_MIXTURES)
 
-    gn_solver = GNSolver(X, pure_components, correction_model=quadratic_correction, fit_function=nnls_fit)
+    solver = GridGNSolver(X, pure_components)
 
     results = []
     for i, sample in enumerate(mixtures_data, 1):
@@ -25,7 +31,7 @@ def main():
         signal = sample['signal']
         result = [true_contributions[-1],
                   nnls_fit(signal, pure_components)[-1],
-                  gn_solver.solve(signal)[0][-1],
+                  solver.solve(signal)[0][-1],
                   ]
         results.append(result)
     results = np.array(results)
@@ -35,19 +41,19 @@ def main():
 
     print("Mean absolute errors:")
     print(f'No correction: {mean_abs_error_no_correction}')
-    print(f'Gauss-Newton: {mean_abs_error_gauss_newton}')
+    print(f'With correction: {mean_abs_error_gauss_newton}')
 
     _ = plt.figure()
     _ = plt.subplot(2, 1, 1)
     _ = plt.plot(results[:, 0], 'b-', results[:, 1], 'r-', results[:, 1] - results[:, 0], 'g-')
     plt.grid()
-    _ = plt.title('NNLS without X axis correction')
+    _ = plt.title('Without X axis correction')
     _ = plt.legend(['True', 'Predicted', 'Error'])
 
     plt.subplot(2, 1, 2)
     _ = plt.plot(results[:, 0], 'b-', results[:, 2], 'r-', results[:, 2] - results[:, 0], 'g-')
     plt.grid()
-    _ = plt.title('NNLS with Gauss-Newton correction')
+    _ = plt.title('With X axis correction')
     _ = plt.legend(['True', 'Predicted', 'Error'])
     plt.show()
 

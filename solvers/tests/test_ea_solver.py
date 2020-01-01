@@ -1,10 +1,7 @@
-import timeit
-from functools import partial
-
 from solvers.ea_solver import EASolver
-from solvers.math import interpolate_signal, nnls_fit, ls_fit
-from solvers.correction_models import linear_correction
+from solvers.math import interpolate_signal, ls_fit
 from solvers.tests.base_test_case import BaseTestCase
+from solvers.tests.correction_models import linear_correction
 
 
 class TestEASolver(BaseTestCase):

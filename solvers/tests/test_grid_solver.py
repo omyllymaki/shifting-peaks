@@ -2,10 +2,10 @@ import itertools
 
 import numpy as np
 
-from solvers.correction_models import linear_correction
 from solvers.grid_solver import GridSolver
 from solvers.math import interpolate_signal, ls_fit
 from solvers.tests.base_test_case import BaseTestCase
+from solvers.tests.correction_models import linear_correction
 
 
 class TestGridSolver(BaseTestCase):

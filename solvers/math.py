@@ -2,7 +2,6 @@ from typing import Callable
 
 import numpy as np
 from numpy.linalg import pinv
-from scipy.optimize import nnls
 
 
 def interpolate_signal(signal: np.ndarray,
@@ -32,10 +31,6 @@ def rsme(residuals: np.ndarray) -> float:
 
 def calculate_pseudoinverse(x: np.ndarray) -> np.ndarray:
     return pinv(x.T @ x) @ x.T
-
-
-def nnls_fit(signal: np.ndarray, pure_component_signals: np.ndarray) -> np.ndarray:
-    return nnls(pure_component_signals.T, signal)[0]
 
 
 def ls_fit(signal: np.ndarray, pure_component_signals: np.ndarray) -> np.ndarray:

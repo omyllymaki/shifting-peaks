@@ -35,13 +35,46 @@ pip install -r requirements.txt
 
 ## Usage
 
-Just run analysis sample:
+Define correction model and regular fit function, e.g.
 
 ```
-python analysis_sample.py
+def quadratic_correction(x: np.ndarray, coefficients: np.ndarray) -> np.ndarray:
+    return coefficients[0] * x ** 2 + (coefficients[1] + 1) * x + coefficients[2]
+
+def nnls_fit(signal: np.ndarray, pure_component_signals: np.ndarray) -> np.ndarray:
+    return nnls(pure_component_signals.T, signal)[0]
 ```
 
-You can also generate your own data set:
+Initialize solver, e.g.
+
+```
+solver = GNSolver(x=x,
+                  pure_components=pure_components,
+                  correction_model=quadratic_correction,
+                  fit_function=nnls_fit)
+```
+
+Use solver to solve mixture signal:
+
+```
+solution, parameters = solve(signal)
+```
+
+See sample app for more details.
+
+
+## Sample app
+
+Sample app demonstrates usage of solvers with generated synthetic data.
+    
+
+Run analysis:
+
+```
+python analysis.py
+```
+
+Generate new data set:
 
 ```
 python generate_test_data.py
