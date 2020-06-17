@@ -3,6 +3,8 @@
 This project provides methods to correct effect of peak shifting in curve fitting problem. The methods 
 are illustrated with synthetic data.
 
+https://medium.com/@omyllymaki/shifting-peaks-in-signal-separation-4dc6fd3a8b3
+
 ## Background
 
 The target of curve fitting is to extract amounts of different components from measured signal.
