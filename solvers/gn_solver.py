@@ -11,7 +11,7 @@ class GNSolver(BaseSolver):
                  x: np.ndarray,
                  pure_components: np.ndarray,
                  correction_model: Callable,
-                 min_iter: int = 10,
+                 min_iter: int = 5,
                  max_iter: int = 100,
                  relative_tolerance: float = 10 ** (-5),
                  fit_function: Callable = ls_fit,
@@ -39,7 +39,7 @@ class GNSolver(BaseSolver):
 
         for self.iteration_round in range(1, self.max_iter + 1):
 
-            prediction, residual = self.fit_with_shifted_axis(parameters)
+            prediction, residual = self.fit_with_shifted_axis(parameters, self.iteration_round)
             self.rsme_current = rsme(residual)
 
             self.logger.debug(f'''

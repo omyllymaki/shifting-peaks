@@ -6,15 +6,16 @@ from numpy.random import normal as rand
 
 from constants import PATH_PURE_COMPONENTS, PATH_MIXTURES
 from file_io import save_pickle_file
+from scipy.optimize import nnls
 
 X = np.arange(-50, 150)
 KEEP_CHANNELS = np.arange(50, 150)
 N_SAMPLES = 100
-OFFSET_ERROR_STDEV = 2
-SLOPE_ERROR_STDEV = 0.01
-QUADRATIC_ERROR_STDEV = 0.0005
-MAX_CONTRIBUTIONS = [100, 500, 35]
-AMPLITUDE_NOISE = 1
+OFFSET_ERROR_STDEV = 3
+SLOPE_ERROR_STDEV = 0.02
+QUADRATIC_ERROR_STDEV = 0.0012
+MAX_CONTRIBUTIONS = [100, 500, 100]
+AMPLITUDE_NOISE = 4
 
 
 def interpolate_signal(signal: np.ndarray,
@@ -69,8 +70,40 @@ def main():
         contributions = generate_random_contributions(MAX_CONTRIBUTIONS)
         mixture_signal = calculate_signal(contributions, pure_components)
         x_distorted = generate_distorted_axis(X, OFFSET_ERROR_STDEV, SLOPE_ERROR_STDEV, QUADRATIC_ERROR_STDEV)
+
+        plt.subplot(2,1,1)
+        plt.plot(mixture_signal[KEEP_CHANNELS], linewidth=3,  label="Sum signal")
+        counter = 1
+        for c, comp in zip(contributions, pure_components):
+            plt.plot(c * comp[KEEP_CHANNELS], linewidth=1.5, label=f"Component {counter}: {c:0.02f}")
+            counter += 1
+        plt.title("Original signal")
+        plt.grid()
+        plt.xlabel("X")
+        plt.ylabel("Y")
+        plt.legend()
+
         mixture_signal = interpolate_signal(mixture_signal, X, x_distorted, 0, 0)
         mixture_signal = mixture_signal[KEEP_CHANNELS]
+        c_fit = nnls(pure_components[:,KEEP_CHANNELS].T, mixture_signal)[0]
+        fitted_signal = (pure_components.T @ c_fit)[KEEP_CHANNELS]
+        plt.subplot(2,1,2)
+        plt.plot(mixture_signal, linewidth=2.5, label="Shifted sum signal")
+        counter = 1
+        for c, comp in zip(c_fit, pure_components):
+            plt.plot(c*comp[KEEP_CHANNELS], linewidth=1.5, label=f"Fitted component {counter}: {c:0.02f}")
+            counter += 1
+        plt.plot(fitted_signal, linewidth=2.5, label="Fitted signal")
+        plt.title("Shifted signal")
+        plt.grid()
+        plt.xlabel("X")
+        plt.ylabel("Y")
+        plt.legend()
+
+        plt.show()
+
+
+
         mixture_signal = add_amplitude_noise_to_signal(mixture_signal, AMPLITUDE_NOISE)
         mixtures_data.append(
             {'contributions': contributions,
@@ -81,6 +114,9 @@ def main():
     plt.figure()
     for signal in pure_components:
         plt.plot(range(len(signal)), signal)
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.title("Pure components")
     plt.grid()
     plt.show()
 
@@ -89,6 +125,9 @@ def main():
         signal = sample['signal']
         plt.plot(range(len(signal)), sample['signal'])
     plt.grid()
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.title("Mixtures")
     plt.show()
 
     save_pickle_file(pure_components, PATH_PURE_COMPONENTS)

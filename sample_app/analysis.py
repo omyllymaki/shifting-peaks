@@ -7,6 +7,8 @@ from file_io import load_pickle_file
 from grid_gn_solver import GridGNSolver
 from scipy.optimize import nnls
 
+from solvers.gn_solver import GNSolver
+
 logging.basicConfig(level=logging.WARNING)
 
 
@@ -22,7 +24,7 @@ def main():
     pure_components = load_pickle_file(PATH_PURE_COMPONENTS)
     mixtures_data = load_pickle_file(PATH_MIXTURES)
 
-    solver = GridGNSolver(X, pure_components)
+    solver = GNSolver(X, pure_components, quadratic_correction, fit_function=nnls_fit)
 
     results = []
     for i, sample in enumerate(mixtures_data, 1):
@@ -45,16 +47,18 @@ def main():
 
     _ = plt.figure()
     _ = plt.subplot(2, 1, 1)
-    _ = plt.plot(results[:, 0], 'b-', results[:, 1], 'r-', results[:, 1] - results[:, 0], 'g-')
+    _ = plt.plot(results[:, 0], 'b-', results[:, 1], 'r-')
     plt.grid()
     _ = plt.title('Without X axis correction')
-    _ = plt.legend(['True', 'Predicted', 'Error'])
+    _ = plt.legend(['True', 'Predicted'])
+    plt.xlabel("Sample")
 
     plt.subplot(2, 1, 2)
-    _ = plt.plot(results[:, 0], 'b-', results[:, 2], 'r-', results[:, 2] - results[:, 0], 'g-')
+    _ = plt.plot(results[:, 0], 'b-', results[:, 2], 'r-')
     plt.grid()
     _ = plt.title('With X axis correction')
-    _ = plt.legend(['True', 'Predicted', 'Error'])
+    _ = plt.legend(['True', 'Predicted'])
+    plt.xlabel("Sample")
     plt.show()
 
 

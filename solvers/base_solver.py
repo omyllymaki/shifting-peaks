@@ -3,7 +3,8 @@ from typing import Tuple, Optional, Callable
 
 import numpy as np
 
-from solvers.math import interpolate_array, calculate_signal, ls_fit
+from solvers.math import interpolate_array, calculate_signal, ls_fit, rsme
+import matplotlib.pyplot as plt
 
 
 class BaseSolver:
@@ -36,6 +37,8 @@ class BaseSolver:
         """
         self.correction_model = correction_model
         self.fit_function = fit_function
+        self.rounds = []
+        self.costs = []
 
     def solve(self, signal: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """
@@ -44,7 +47,8 @@ class BaseSolver:
         """
         raise NotImplementedError
 
-    def fit_with_shifted_axis(self, parameters: np.ndarray) -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]:
+    def fit_with_shifted_axis(self, parameters: np.ndarray, round=None) -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]:
+        self.round = round
         x_target = self.correction_model(self.x, parameters)
 
         if not self._is_x_within_target_range(x_target):
@@ -74,5 +78,38 @@ class BaseSolver:
         prediction = self.fit_function(signal_copy, pure_components_interpolated)
         estimate = calculate_signal(prediction, pure_components_interpolated)
         residual = estimate - signal_copy
+
+        # if self.round == 2:
+        #     self.rounds = []
+        #     self.costs = []
+        #     plt.figure(1)
+        #     plt.clf()
+        #
+        # if self.round is not None and self.round>1:
+        #     cost = rsme(residual)
+        #     self.rounds.append(self.round-1)
+        #     self.costs.append(cost)
+        #
+        #     plt.figure(1)
+        #     plt.subplot(2,3,self.round-1)
+        #     plt.plot(self.signal, label="Measured signal")
+        #     plt.plot(estimate, label="Signal estimate")
+        #     plt.plot(residual, label="Residual")
+        #     plt.xlabel("X")
+        #     plt.ylabel("Y")
+        #     plt.legend()
+        #     plt.title(f"Iteration {self.round-1}; RSME {cost:0.02f}")
+        #     plt.grid()
+
+            # plt.figure(1)
+            # plt.subplot(1,2,2)
+            # plt.cla()
+            # plt.plot(self.rounds, self.costs, "-o")
+            # plt.title("RMSE")
+            # plt.ylabel("RMSE")
+            # plt.xlabel("Iteration")
+            # plt.grid()
+
+            # plt.pause(0.1)
 
         return prediction, residual
